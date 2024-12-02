@@ -30,13 +30,11 @@
         alert('二维码 ID 无效');
         return;
       }
-
+      
       // 发送 POST 请求到后端
-      fetch(`/bind-phone/${qrId}`, {
+      fetch(`http://localhost:3000/bind-phone/${qrId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'  // 确保后端知道接收 JSON 格式的数据
-        },
+        headers: { 'Content-Type': 'application/json'  },// 确保后端知道接收 JSON 格式的数据
         body: JSON.stringify({ phone })  // 将手机号包装成 JSON 格式发送
       })
       .then(response => response.json())  // 后端返回 JSON 格式的数据
