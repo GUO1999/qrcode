@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>二维码绑定示例</title>
+</head>
+<body>
+  <h1>扫描二维码进行手机号绑定</h1>
+  <p>请扫描以下二维码并输入您的手机号进行绑定：</p>
+
+  <!-- 显示生成的二维码 -->
+  <div id="qr-code"></div>
+
+  <script>
+    // 请求生成二维码的API
+    fetch('/generate-qr')
+      .then(response => response.text())
+      .then(data => {
+        document.getElementById('qr-code').innerHTML = data;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  </script>
+</body>
+</html>
