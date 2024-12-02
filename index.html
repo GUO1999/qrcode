@@ -19,24 +19,38 @@
   <script>
     // 获取 URL 中的 qrId 参数
     const urlParams = new URLSearchParams(window.location.search);
-    const qrId = urlParams.get('qrId');
+    const qrId = urlParams.get('qrId');  // 获取 qrId 参数
 
     // 提交手机号并发送到后端进行绑定
     function submitPhoneNumber() {
-      const phone = document.getElementById('phone').value;
+      const phone = document.getElementById('phone').value;  // 获取手机号
 
+      // 确保 qrId 存在
+      if (!qrId) {
+        alert('二维码 ID 无效');
+        return;
+      }
+
+      // 发送 POST 请求到后端
       fetch(`/bind-phone/${qrId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone })
+        headers: {
+          'Content-Type': 'application/json'  // 确保后端知道接收 JSON 格式的数据
+        },
+        body: JSON.stringify({ phone })  // 将手机号包装成 JSON 格式发送
       })
-      .then(response => response.json())
+      .then(response => response.json())  // 后端返回 JSON 格式的数据
       .then(data => {
-        alert('手机号绑定成功');
-        window.location.href = 'tel:' + phone; // 自动拨打电话
+        if (data.success) {  // 如果返回的成功标志为 true
+          alert('手机号绑定成功');
+          window.location.href = `tel:${phone}`;  // 自动拨打电话
+        } else {
+          alert('绑定失败');
+        }
       })
       .catch(error => {
-        alert('绑定失败');
+        alert('发生错误，绑定失败');
+        console.error('Error:', error);
       });
     }
   </script>
