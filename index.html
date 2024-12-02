@@ -1,32 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>手机号绑定</title>
+  <title>二维码绑定手机号</title>
 </head>
 <body>
-  <h1>您好，请输入您的手机号码进行绑定</h1>
-  
-  <!-- 手机号码绑定表单 -->
-  <form id="phone-form" action="/bind-phone" method="POST">
+
+  <h1>请输入您的手机号码进行绑定</h1>
+
+  <!-- 手机号输入表单 -->
+  <form id="phoneForm" onsubmit="event.preventDefault(); submitPhoneNumber();">
     <label for="phone">请输入手机号：</label>
     <input type="text" id="phone" name="phone" required placeholder="请输入手机号码">
     <button type="submit">提交</button>
   </form>
 
   <script>
-    // 可以选择提交表单时做一些验证或进一步处理
-    const form = document.getElementById('phone-form');
-    form.onsubmit = function(event) {
-      // 确保手机号码填写正确
-      const phoneInput = document.getElementById('phone').value;
-      const phonePattern = /^[0-9]{10,15}$/;  // 假设手机号码为 10-15 位数字
-      if (!phonePattern.test(phoneInput)) {
-        alert('请输入有效的手机号码');
-        event.preventDefault(); // 防止表单提交
-      }
-    };
+    // 获取 URL 中的 qrId 参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const qrId = urlParams.get('qrId');
+
+    // 提交手机号并发送到后端进行绑定
+    function submitPhoneNumber() {
+      const phone = document.getElementById('phone').value;
+
+      fetch(`/bind-phone/${qrId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('手机号绑定成功');
+        window.location.href = 'tel:' + phone; // 自动拨打电话
+      })
+      .catch(error => {
+        alert('绑定失败');
+      });
+    }
   </script>
+
 </body>
 </html>
