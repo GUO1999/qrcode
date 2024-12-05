@@ -46,7 +46,7 @@
 
       try {
         // 发送 POST 请求到后端，并自动替换 qrId
-        const response = await fetch(`http://localhost:5000/bind-phone/${qrId}`, {
+        const response = await fetch(`http://localhost:5000/bind-phone, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',  // 确保后端知道接收 JSON 格式的数据
