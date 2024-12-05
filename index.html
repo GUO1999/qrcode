@@ -12,7 +12,7 @@
   <!-- 手机号输入表单 -->
   <form id="phoneForm" onsubmit="event.preventDefault(); submitPhoneNumber();">
     <label for="phone">请输入手机号：</label>
-    <input type="text" id="phone" name="phone" required placeholder="请输入手机号码">
+    <input type="number" id="phone" name="phone" required placeholder="请输入手机号码">
     <button type="submit">提交</button>
   </form>
 
@@ -28,6 +28,13 @@
       // 确保 qrId 存在
       if (!qrId) {
         alert('二维码 ID 无效');
+        return;
+      }
+      
+      document.getElementById('button').addEventListener('click', async () => {
+      const number = document.getElementById('phone').value;
+      if (!number) {
+        alert('请输入一个数字！');
         return;
       }
 
