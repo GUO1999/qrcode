@@ -11,64 +11,70 @@
 
   <!-- 显示二维码 ID -->
   <div id="qrIdDisplay">二维码 ID: </div>
+  <div id="responseMessage"></div> <!-- 显示响应信息 -->
 
   <!-- 手机号输入表单 -->
-  <form id="phoneForm" onsubmit="event.preventDefault(); submitPhoneNumber();">
-    <label for="phone">请输入手机号：</label>
-    <input type="number" id="phone" name="phone" required placeholder="请输入手机号码">
-    <button type="submit">提交</button>
-  </form>
+  <label for="phone">请输入手机号：</label>
+  <input type="number" id="phone" name="phone" required placeholder="请输入手机号码">
+  <button id="sendButton">发送</button>
 
   <script>
     // 获取 URL 中的 qrId 参数
     const urlParams = new URLSearchParams(window.location.search);
     const qrId = urlParams.get('qrId');  // 获取 qrId 参数
 
-    // 在控制台打印出 qrId
-    console.log('获取到的二维码 ID:', qrId);  // 打印获取到的 qrId
+    // 在页面加载时显示 qrId
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('获取到的二维码 ID:', qrId);  // 打印获取到的 qrId
+      if (qrId) {
+        document.getElementById('qrIdDisplay').innerText = '二维码 ID: ' + qrId;
+      } else {
+        document.getElementById('qrIdDisplay').innerText = '二维码 ID 无效';
+      }
+    });
 
-    // 将 qrId 显示在网页上
-    if (qrId) {
-      document.getElementById('qrIdDisplay').innerText = '二维码 ID: ' + qrId;
-    } else {
-      document.getElementById('qrIdDisplay').innerText = '二维码 ID 无效';
-    }
+    // 监听按钮点击事件
+    document.getElementById('sendButton').addEventListener('click', async () => {
+      const phone = document.getElementById('phone').value; // 获取用户输入的手机号
 
-    // 提交手机号并发送到后端进行绑定
-    async function submitPhoneNumber() {
-      const phone = document.getElementById('phone').value;  // 获取手机号
+      // 验证输入是否为空
+      if (!phone) {
+        alert('请输入手机号！');
+        return;
+      }
 
-      // 确保 qrId 存在
+      // 验证 qrId 是否有效
       if (!qrId) {
         alert('二维码 ID 无效');
         return;
       }
 
       try {
-        // 发送 POST 请求到后端，并自动替换 qrId
-        const response = await fetch(`http://localhost:5000/bind-phone, {
+        // 发送 POST 请求到后端，并将手机号与 qrId 绑定
+        const response = await fetch(`http://localhost:5000/bind-phone/${qrId}`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',  // 确保后端知道接收 JSON 格式的数据
+            'Content-Type': 'application/json',  // 确保后端接收 JSON 数据
           },
-          body: JSON.stringify({ phone }),  // 将手机号包装成 JSON 格式发送
+          body: JSON.stringify({ phone }),  // 发送手机号作为请求体
         });
 
-        // 处理后端响应
-        const data = await response.json();
-
-        if (data.success) {  // 如果返回的成功标志为 true
+        // 处理后端返回结果
+        const result = await response.json();
+        if (result.success) {
+          document.getElementById('responseMessage').innerText = '手机号绑定成功';
           alert('手机号绑定成功');
-          console.log('二维码 ID 已绑定:', qrId);  // 打印已绑定的 qrId
-          window.location.href = `tel:${phone}`;  // 自动拨打电话
+          console.log('二维码 ID 已绑定:', qrId); // 打印已绑定的 qrId
         } else {
+          document.getElementById('responseMessage').innerText = '绑定失败: ' + result.message;
           alert('绑定失败');
         }
       } catch (error) {
-        alert('发生错误，绑定失败');
+        document.getElementById('responseMessage').innerText = '绑定失败，发生错误';
         console.error('Error:', error);
+        alert('发生错误，绑定失败');
       }
-    }
+    });
   </script>
 
 </body>
