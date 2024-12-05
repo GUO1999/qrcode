@@ -11,6 +11,7 @@
 
   <!-- 显示二维码 ID -->
   <div id="qrIdDisplay">二维码 ID: </div>
+  <div id="requestUrlDisplay">完整请求 URL: </div> <!-- 新增显示请求 URL 的区域 -->
   <div id="responseMessage"></div> <!-- 显示响应信息 -->
 
   <!-- 手机号输入表单 -->
@@ -21,11 +22,11 @@
   <script>
     // 获取 URL 中的 qrId 参数
     const urlParams = new URLSearchParams(window.location.search);
-    const qrId = urlParams.get('qrId');  // 获取 qrId 参数
+    const qrId = urlParams.get('qrId'); // 获取 qrId 参数
 
     // 在页面加载时显示 qrId
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('获取到的二维码 ID:', qrId);  // 打印获取到的 qrId
+      console.log('获取到的二维码 ID:', qrId); // 打印获取到的 qrId
       if (qrId) {
         document.getElementById('qrIdDisplay').innerText = '二维码 ID: ' + qrId;
       } else {
@@ -49,14 +50,21 @@
         return;
       }
 
+      // 构造完整的请求 URL
+      const requestUrl = `http://localhost:5000/bind-phone/${qrId}`;
+      document.getElementById('requestUrlDisplay').innerText = '完整请求 URL: ' + requestUrl; // 动态显示请求 URL
+
       try {
-        // 发送 POST 请求到后端，并将手机号与 qrId 绑定
-        const response = await fetch(`http://localhost:5000/bind-phone/${qrId}`, {
+        console.log('发送的完整请求 URL:', requestUrl); // 打印完整请求 URL
+        console.log('发送的请求体:', { phone }); // 打印请求体
+
+        // 发送 POST 请求到后端
+        const response = await fetch(requestUrl, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',  // 确保后端接收 JSON 数据
+            'Content-Type': 'application/json', // 确保后端接收 JSON 数据
           },
-          body: JSON.stringify({ phone }),  // 发送手机号作为请求体
+          body: JSON.stringify({ phone }), // 发送手机号作为请求体
         });
 
         // 处理后端返回结果
