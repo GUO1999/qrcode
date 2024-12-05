@@ -77,6 +77,13 @@
           document.getElementById('responseMessage').innerText = '手机号绑定成功';
           alert('手机号绑定成功');
           console.log('二维码 ID 已绑定:', qrId); // 打印已绑定的 qrId
+          // 显示拨打电话的按钮
+          document.getElementById('dialButton').style.display = 'block';
+          // 设置拨号按钮的点击事件
+          document.getElementById('dialPhoneButton').addEventListener('click', () => {
+            window.location.href = `tel:${phone}`; // 点击按钮时拨打电话
+          });
+          
         } else {
           document.getElementById('responseMessage').innerText = '绑定失败: ' + result.message;
           alert('绑定失败');
