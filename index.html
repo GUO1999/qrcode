@@ -11,14 +11,17 @@
 
   <!-- 显示二维码 ID -->
   <div id="qrIdDisplay">二维码 ID: </div>
-  <div id="requestUrlDisplay">完整请求 URL: </div> <!-- 新增显示请求 URL 的区域 -->
-  <div id="phoneDisplay">您输入的手机号是： </div> <!-- 新增显示手机号的区域 -->
+  <div id="requestUrlDisplay">完整请求 URL: </div>
+  <div id="phoneDisplay">您输入的手机号是： </div>
   <div id="responseMessage"></div> <!-- 显示响应信息 -->
 
   <!-- 手机号输入表单 -->
   <label for="phone">请输入手机号：</label>
   <input type="number" id="phone" name="phone" required placeholder="请输入手机号码">
   <button id="sendButton">发送</button>
+
+  <!-- 拨打电话按钮，初始隐藏 -->
+  <button id="dialButton" style="display: none;">拨打电话</button>
 
   <script>
     // 获取 URL 中的 qrId 参数
@@ -56,7 +59,7 @@
 
       // 构造完整的请求 URL
       const requestUrl = `https://nameless-dusk-81868-9c8e0560b4e6.herokuapp.com/bind-phone/${qrId}`;
-      document.getElementById('requestUrlDisplay').innerText = '完整请求 URL: ' + requestUrl; // 动态显示请求 URL
+      document.getElementById('requestUrlDisplay').innerText = '完整请求 URL: ' + requestUrl;
 
       try {
         console.log('发送的完整请求 URL:', requestUrl); // 打印完整请求 URL
@@ -68,7 +71,7 @@
           headers: {
             'Content-Type': 'application/json', // 确保后端接收 JSON 数据
           },
-          body: JSON.stringify({ phone }), // 发送手机号和 qrId 作为请求体体
+          body: JSON.stringify({ phone }), // 发送手机号和 qrId
         });
 
         // 处理后端返回结果
@@ -76,13 +79,19 @@
         if (result.success) {
           document.getElementById('responseMessage').innerText = '手机号绑定成功';
           alert('手机号绑定成功');
-          console.log('二维码 ID 已绑定:', qrId); // 打印已绑定的 qrId
+          console.log('二维码 ID 已绑定:', qrId);
+
           // 显示拨打电话的按钮
-          document.getElementById('dialButton').style.display = 'block';
-          // 设置拨号按钮的点击事件
-          document.getElementById('dialPhoneButton').addEventListener('click', () => {
-            window.location.href = `tel:${phone}`; // 点击按钮时拨打电话
-          });
+          const dialButton = document.getElementById('dialButton');
+          dialButton.style.display = 'block';
+
+          // 获取拨号链接
+          const dialLink = result.dialLink;
+
+          // 绑定拨号按钮点击事件
+          dialButton.onclick = () => {
+            window.location.href = dialLink; // 点击按钮拨打电话
+          };
           
         } else {
           document.getElementById('responseMessage').innerText = '绑定失败: ' + result.message;
