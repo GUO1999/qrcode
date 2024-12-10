@@ -133,14 +133,8 @@
           // 保存虚拟号码到 localStorage
           localStorage.setItem(`virtualPhone_${qrId}`, virtualPhone);
 
-          // 显示拨打虚拟号码按钮
-          showDialButton(virtualPhone);
-        } else {
-          alert('虚拟号码绑定失败或不存在');
         }
-      } catch (error) {
-        console.error('获取虚拟号码时发生错误:', error);
-      }
+      } 
     }
 
     // 显示拨打虚拟号码按钮
@@ -148,6 +142,7 @@
       const dialButton = document.getElementById('dialButton');
 
       if (virtualPhone && virtualPhone !== 'null') {
+        console.log("虚拟号码有效:", virtualPhone);
         dialButton.style.display = 'block';  // 显示拨打按钮
         dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
 
