@@ -47,22 +47,22 @@
       }
 
       if (virtualPhone && virtualPhone !== 'null') {
-        showDialButton(virtualPhone);
+        showDialButton(virtualPhone); // 显示拨打虚拟号码按钮
       }
       
     });
 
-    // 监听按钮点击事件
+    // 监听发送按钮点击事件
     document.getElementById('sendButton').addEventListener('click', async () => {
       const phone = document.getElementById('phone').value; // 获取用户输入的手机号
 
-      // 验证输入是否为空
+      // 验证手机号输入
       if (!phone) {
         alert('请输入手机号！');
         return;
       }
 
-      // 验证 qrId 是否有效
+      // 验证二维码 ID 是否有效
       if (!qrId) {
         alert('二维码 ID 无效');
         return;
@@ -71,48 +71,38 @@
       // 显示用户输入的手机号
       document.getElementById('phoneDisplay').innerText = '您输入的手机号是： ' + phone;
 
-      // 构造完整的请求 URL
+      // 构造请求 URL
       const requestUrl = `https://nameless-dusk-81868-9c8e0560b4e6.herokuapp.com/bind-phone/${qrId}`;
       document.getElementById('requestUrlDisplay').innerText = '完整请求 URL: ' + requestUrl;
 
       try {
-        // 发送 POST 请求到后端
+        // 发送 POST 请求到后端进行手机号绑定
         const response = await fetch(requestUrl, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json', // 确保后端接收 JSON 数据
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({ phone }), // 发送手机号和 qrId
         });
 
         // 处理后端返回结果
         const result = await response.json();
-        console.log('后端返回的结果:', result); // 添加调试打印
+        console.log('后端返回的结果:', result);
 
         if (result.success) {
+          // 显示绑定成功信息
           document.getElementById('responseMessage').innerText = '手机号绑定成功';
           alert('手机号绑定成功');
-
-          // 保存绑定信息到 localStorage
+          
+          // 保存手机号到 localStorage
           localStorage.setItem(`phone_${qrId}`, phone);
-          localStorage.setItem(`virtualPhone_${qrId}`, result.virtualPhone);
 
-          // 只有在绑定虚拟号码成功后，显示拨打虚拟号码按钮
-          const dialButton = document.getElementById('dialButton');
-          dialButton.style.display = 'block';  // 显示拨打按钮
-          dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
-
-          // 绑定拨号按钮点击事件
-          dialButton.onclick = () => {
-            const confirmation = confirm(`您即将拨打虚拟号码：${virtualPhone}. 确认拨打?`);
-            if (confirmation) {
-              window.location.href = `tel:${virtualPhone}`;
-            }
-          };
-
-          // 隐藏其他内容
+          // 隐藏发送按钮等内容
           document.getElementById('sendButton').style.display = 'none';
           document.getElementById('requestUrlDisplay').style.display = 'none';
+
+           // 调用函数检查并显示虚拟号码按钮
+          getVirtualPhone();
         } else {
           document.getElementById('responseMessage').innerText = '绑定失败: ' + result.message;
           alert('绑定失败');
@@ -123,6 +113,49 @@
         alert('发生错误，绑定失败');
       }
     });
+
+     // 获取虚拟号码并显示拨打按钮
+    async function getVirtualPhone() {
+      const requestUrl = `https://nameless-dusk-81868-9c8e0560b4e6.herokuapp.com/admin/bind-virtual`;
+
+      try {
+        // 请求后端获取虚拟号码
+        const response = await fetch(requestUrl);
+        const result = await response.json();
+
+        if (result.success && result.virtualPhone) {
+          // 保存虚拟号码到 localStorage
+          localStorage.setItem(`virtualPhone_${qrId}`, result.virtualPhone);
+
+          // 显示拨打虚拟号码按钮
+          showDialButton(result.virtualPhone);
+        } else {
+          alert('虚拟号码绑定失败或不存在');
+        }
+      } catch (error) {
+        console.error('获取虚拟号码时发生错误:', error);
+      }
+    }
+
+    // 显示拨打虚拟号码按钮
+    function showDialButton(virtualPhone) {
+      const dialButton = document.getElementById('dialButton');
+
+      if (virtualPhone && virtualPhone !== 'null') {
+        dialButton.style.display = 'block';  // 显示拨打按钮
+        dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
+
+        // 绑定拨号按钮点击事件
+        dialButton.onclick = () => {
+          const confirmation = confirm(`您即将拨打虚拟号码：${virtualPhone}. 确认拨打?`);
+          if (confirmation) {
+            window.location.href = `tel:${virtualPhone}`;  // 使用 tel 协议拨打电话
+          }
+        };
+      }
+    }
+
+   
   </script>
 
 </body>
