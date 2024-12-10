@@ -85,14 +85,24 @@
           const dialButton = document.getElementById('dialButton');
           dialButton.style.display = 'block';
 
-          // 获取拨号链接
-          const dialLink = result.dialLink;
+          // 获取虚拟电话号码并显示
+          const virtualPhone = result.virtualPhone;
+          dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
 
           // 绑定拨号按钮点击事件
           dialButton.onclick = () => {
-            window.location.href = dialLink; // 点击按钮拨打电话
+            // 弹出确认框，显示虚拟号码并提供拨号按钮
+            const confirmation = confirm(`您即将拨打虚拟号码：${virtualPhone}. 确认拨打?`);
+            if (confirmation) {
+              window.location.href = `tel:${virtualPhone}`; // 点击按钮拨打电话
+            }
           };
-          
+
+          // 隐藏其他内容
+          document.getElementById('phoneDisplay').style.display = 'none';
+          document.getElementById('sendButton').style.display = 'none';
+          document.getElementById('requestUrlDisplay').style.display = 'none';
+
         } else {
           document.getElementById('responseMessage').innerText = '绑定失败: ' + result.message;
           alert('绑定失败');
