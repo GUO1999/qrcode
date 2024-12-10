@@ -28,13 +28,38 @@
     const urlParams = new URLSearchParams(window.location.search);
     const qrId = urlParams.get('qrId'); // 获取 qrId 参数
 
-    // 在页面加载时显示 qrId
+    // 页面加载时的初始化逻辑
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('获取到的二维码 ID:', qrId); // 打印获取到的 qrId
+      // 显示 qrId
       if (qrId) {
         document.getElementById('qrIdDisplay').innerText = '二维码 ID: ' + qrId;
       } else {
         document.getElementById('qrIdDisplay').innerText = '二维码 ID 无效';
+        return;
+      }
+
+      // 检查 localStorage 中是否有保存的手机号和绑定信息
+      const savedPhone = localStorage.getItem(`phone_${qrId}`);
+      const virtualPhone = localStorage.getItem(`virtualPhone_${qrId}`);
+      if (savedPhone) {
+        document.getElementById('phone').value = savedPhone;
+        document.getElementById('phoneDisplay').innerText = '您输入的手机号是： ' + savedPhone;
+      }
+
+      if (virtualPhone) {
+        const dialButton = document.getElementById('dialButton');
+        dialButton.style.display = 'block';
+        dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
+        dialButton.onclick = () => {
+          const confirmation = confirm(`您即将拨打虚拟号码：${virtualPhone}. 确认拨打?`);
+          if (confirmation) {
+            window.location.href = `tel:${virtualPhone}`;
+          }
+        };
+
+        // 隐藏发送按钮等内容
+        document.getElementById('sendButton').style.display = 'none';
+        document.getElementById('requestUrlDisplay').style.display = 'none';
       }
     });
 
@@ -62,9 +87,6 @@
       document.getElementById('requestUrlDisplay').innerText = '完整请求 URL: ' + requestUrl;
 
       try {
-        console.log('发送的完整请求 URL:', requestUrl); // 打印完整请求 URL
-        console.log('发送的请求体:', { phone }); // 打印请求体
-
         // 发送 POST 请求到后端
         const response = await fetch(requestUrl, {
           method: 'POST',
@@ -79,30 +101,27 @@
         if (result.success) {
           document.getElementById('responseMessage').innerText = '手机号绑定成功';
           alert('手机号绑定成功');
-          console.log('二维码 ID 已绑定:', qrId);
+
+          // 保存绑定信息到 localStorage
+          localStorage.setItem(`phone_${qrId}`, phone);
+          localStorage.setItem(`virtualPhone_${qrId}`, result.virtualPhone);
 
           // 显示拨打电话的按钮
           const dialButton = document.getElementById('dialButton');
           dialButton.style.display = 'block';
-
-          // 获取虚拟电话号码并显示
-          const virtualPhone = result.virtualPhone;
-          dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
+          dialButton.innerText = `拨打虚拟号码: ${result.virtualPhone}`;
 
           // 绑定拨号按钮点击事件
           dialButton.onclick = () => {
-            // 弹出确认框，显示虚拟号码并提供拨号按钮
-            const confirmation = confirm(`您即将拨打虚拟号码：${virtualPhone}. 确认拨打?`);
+            const confirmation = confirm(`您即将拨打虚拟号码：${result.virtualPhone}. 确认拨打?`);
             if (confirmation) {
-              window.location.href = `tel:${virtualPhone}`; // 点击按钮拨打电话
+              window.location.href = `tel:${result.virtualPhone}`;
             }
           };
 
           // 隐藏其他内容
-          document.getElementById('phoneDisplay').style.display = 'none';
           document.getElementById('sendButton').style.display = 'none';
           document.getElementById('requestUrlDisplay').style.display = 'none';
-
         } else {
           document.getElementById('responseMessage').innerText = '绑定失败: ' + result.message;
           alert('绑定失败');
