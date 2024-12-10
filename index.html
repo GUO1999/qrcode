@@ -21,7 +21,7 @@
   <button id="sendButton">发送</button>
 
   <!-- 拨打电话按钮，初始隐藏 -->
-  <button id="dialButton" style="display: none;">拨打电话</button>
+  <button id="dialButton" style="display: none;">拨打虚拟号码</button>
 
   <script>
     // 获取 URL 中的 qrId 参数
@@ -98,20 +98,19 @@
 
         // 处理后端返回结果
         const result = await response.json();
+        console.log('后端返回的结果:', result); // 添加调试打印
+
         if (result.success) {
           document.getElementById('responseMessage').innerText = '手机号绑定成功';
           alert('手机号绑定成功');
-
-          // 打印返回的虚拟号码
-          console.log('虚拟号码:', result.virtualPhone); // 打印虚拟号码到控制台
 
           // 保存绑定信息到 localStorage
           localStorage.setItem(`phone_${qrId}`, phone);
           localStorage.setItem(`virtualPhone_${qrId}`, result.virtualPhone);
 
-          // 显示拨打电话的按钮
+          // 只有在绑定虚拟号码成功后，显示拨打虚拟号码按钮
           const dialButton = document.getElementById('dialButton');
-          dialButton.style.display = 'block';
+          dialButton.style.display = 'block';  // 显示拨打按钮
           dialButton.innerText = `拨打虚拟号码: ${result.virtualPhone}`;
 
           // 绑定拨号按钮点击事件
