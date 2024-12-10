@@ -46,23 +46,24 @@
         document.getElementById('phoneDisplay').innerText = '您输入的手机号是： ' + savedPhone;
       }
 
-      if (virtualPhone && virtualPhone !== 'null') {
-        showDialButton(virtualPhone); // 显示拨打虚拟号码按钮
+      if (virtualPhone) {
+        // 如果虚拟号码存在，直接显示拨打按钮
+        showDialButton(virtualPhone);
       }
-      
     });
 
-    // 监听发送按钮点击事件
+    // 监听按钮点击事件
     document.getElementById('sendButton').addEventListener('click', async () => {
       const phone = document.getElementById('phone').value; // 获取用户输入的手机号
+      const qrId = new URLSearchParams(window.location.search).get('qrId'); // 获取二维码 ID
 
-      // 验证手机号输入
+      // 验证输入是否为空
       if (!phone) {
         alert('请输入手机号！');
         return;
       }
 
-      // 验证二维码 ID 是否有效
+      // 验证 qrId 是否有效
       if (!qrId) {
         alert('二维码 ID 无效');
         return;
@@ -71,92 +72,89 @@
       // 显示用户输入的手机号
       document.getElementById('phoneDisplay').innerText = '您输入的手机号是： ' + phone;
 
-      // 构造请求 URL
+      // 构造完整的请求 URL
       const requestUrl = `https://nameless-dusk-81868-9c8e0560b4e6.herokuapp.com/bind-phone/${qrId}`;
       document.getElementById('requestUrlDisplay').innerText = '完整请求 URL: ' + requestUrl;
 
       try {
-        // 发送 POST 请求到后端进行手机号绑定
+        // 发送 POST 请求到后端，绑定手机号码
         const response = await fetch(requestUrl, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json', // 确保后端接收 JSON 数据
           },
           body: JSON.stringify({ phone }), // 发送手机号和 qrId
         });
 
         // 处理后端返回结果
         const result = await response.json();
-        console.log('后端返回的结果:', result);
+        console.log('后端返回的结果:', result); // 添加调试打印
 
         if (result.success) {
-          // 显示绑定成功信息
           document.getElementById('responseMessage').innerText = '手机号绑定成功';
           alert('手机号绑定成功');
-          
-          // 保存手机号到 localStorage
+
+          // 保存绑定信息到 localStorage
           localStorage.setItem(`phone_${qrId}`, phone);
 
-          // 隐藏发送按钮等内容
-          document.getElementById('sendButton').style.display = 'none';
-          document.getElementById('requestUrlDisplay').style.display = 'none';
-
-           // 调用函数检查并显示虚拟号码按钮
-          getVirtualPhone();
+          // 获取虚拟号码
+          getVirtualPhone(qrId);
         } else {
-          document.getElementById('responseMessage').innerText = '绑定失败: ' + result.message;
-          alert('绑定失败');
+          document.getElementById('responseMessage').innerText = '手机号绑定失败';
         }
       } catch (error) {
-        document.getElementById('responseMessage').innerText = '绑定失败，发生错误';
-        console.error('Error:', error);
-        alert('发生错误，绑定失败');
+        console.error('获取手机号绑定时发生错误:', error);
+        document.getElementById('responseMessage').innerText = '手机号绑定时发生错误';
       }
     });
 
-     // 获取虚拟号码并显示拨打按钮
-    async function getVirtualPhone(qrId, virtualPhone) {
+    // 获取虚拟号码函数
+    async function getVirtualPhone(qrId) {
       const requestUrl1 = `https://nameless-dusk-81868-9c8e0560b4e6.herokuapp.com/admin/bind-virtual`;
 
       try {
-       // 请求后端获取虚拟号码
-    const response = await fetch(requestUrl1, {
-      method: 'POST',  // 使用 POST 请求
-      headers: {
-        'Content-Type': 'application/json',  // 确保后端可以解析请求体中的 JSON 数据
-      },
-      body: JSON.stringify({ qrId, virtualPhone })  // 发送 qrId 和 virtualPhone 作为请求体
-    });
-        const result = await response.json();
+        // 请求后端获取虚拟号码
+        const response1 = await fetch(requestUrl1, {
+          method: 'POST',  // 使用 POST 请求
+          headers: {
+            'Content-Type': 'application/json',  // 确保后端可以解析请求体中的 JSON 数据
+          },
+          body: JSON.stringify({ qrId })  // 发送 qrId 作为请求体
+        });
 
-        if (result.success ) {
-          // 保存虚拟号码到 localStorage
-          localStorage.setItem(`virtualPhone_${qrId}`, virtualPhone);
+        // 检查响应是否成功
+        if (response1.ok) {
+          const result1 = await response1.json();  // 获取后端返回的数据
 
-        }
-      } 
-    }
+          if (result1.success) {
+            // 保存虚拟号码到 localStorage
+            localStorage.setItem(`virtualPhone_${qrId}`, result1.virtualPhone);
 
-    // 显示拨打虚拟号码按钮
-    function showDialButton(virtualPhone) {
-      const dialButton = document.getElementById('dialButton');
-
-      if (virtualPhone && virtualPhone !== 'null') {
-        console.log("虚拟号码有效:", virtualPhone);
-        dialButton.style.display = 'block';  // 显示拨打按钮
-        dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
-
-        // 绑定拨号按钮点击事件
-        dialButton.onclick = () => {
-          const confirmation = confirm(`您即将拨打虚拟号码：${virtualPhone}. 确认拨打?`);
-          if (confirmation) {
-            window.location.href = `tel:${virtualPhone}`;  // 使用 tel 协议拨打电话
+            // 显示拨打虚拟号码按钮
+            showDialButton(result1.virtualPhone);
+          } else {
+            alert('虚拟号码绑定失败');
           }
-        };
+        }
+      } catch (error) {
+        console.error('获取虚拟号码时发生错误:', error);
+        alert('获取虚拟号码时发生错误');
       }
     }
 
-   
+    // 显示拨打虚拟号码按钮的函数
+    function showDialButton(virtualPhone) {
+      const dialButton = document.getElementById('dialButton');
+      dialButton.style.display = 'block';  // 显示拨打按钮
+      dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
+
+      dialButton.onclick = () => {
+        const confirmation = confirm(`您即将拨打虚拟号码：${virtualPhone}. 确认拨打?`);
+        if (confirmation) {
+          window.location.href = `tel:${virtualPhone}`;
+        }
+      };
+    }
   </script>
 
 </body>
