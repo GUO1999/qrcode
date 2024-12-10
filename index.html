@@ -102,6 +102,9 @@
           document.getElementById('responseMessage').innerText = '手机号绑定成功';
           alert('手机号绑定成功');
 
+          // 打印返回的虚拟号码
+          console.log('虚拟号码:', result.virtualPhone); // 打印虚拟号码到控制台
+
           // 保存绑定信息到 localStorage
           localStorage.setItem(`phone_${qrId}`, phone);
           localStorage.setItem(`virtualPhone_${qrId}`, result.virtualPhone);
