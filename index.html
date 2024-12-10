@@ -115,12 +115,18 @@
     });
 
      // 获取虚拟号码并显示拨打按钮
-    async function getVirtualPhone() {
-      const requestUrl = `https://nameless-dusk-81868-9c8e0560b4e6.herokuapp.com/admin/bind-virtual`;
+    async function getVirtualPhone(qrId, virtualPhone) {
+      const requestUrl = `https://nameless-dusk-81868-9c8e0560b4e6.herokuapp.com/admin/bindings/bind-virtual`;
 
       try {
-        // 请求后端获取虚拟号码
-        const response = await fetch(requestUrl);
+       // 请求后端获取虚拟号码
+    const response = await fetch(requestUrl, {
+      method: 'POST',  // 使用 POST 请求
+      headers: {
+        'Content-Type': 'application/json',  // 确保后端可以解析请求体中的 JSON 数据
+      },
+      body: JSON.stringify({ qrId, virtualPhone })  // 发送 qrId 和 virtualPhone 作为请求体
+    });
         const result = await response.json();
 
         if (result.success && result.virtualPhone) {
