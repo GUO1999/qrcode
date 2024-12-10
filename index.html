@@ -46,17 +46,15 @@
         document.getElementById('phoneDisplay').innerText = '您输入的手机号是： ' + savedPhone;
       }
 
-      if (virtualPhone) {
-        // 如果虚拟号码存在存在且不为 null 时才显示拨打按钮
-        if (virtualPhone && virtualPhone !== 'null') {
-      showDialButton(virtualPhone);
+      if (virtualPhone && virtualPhone !== 'null') {
+        showDialButton(virtualPhone);
       }
+      
     });
 
     // 监听按钮点击事件
     document.getElementById('sendButton').addEventListener('click', async () => {
       const phone = document.getElementById('phone').value; // 获取用户输入的手机号
-      const qrId = new URLSearchParams(window.location.search).get('qrId'); // 获取二维码 ID
 
       // 验证输入是否为空
       if (!phone) {
@@ -100,9 +98,19 @@
           localStorage.setItem(`virtualPhone_${qrId}`, result.virtualPhone);
 
           // 只有在绑定虚拟号码成功后，显示拨打虚拟号码按钮
-          showDialButton(result.virtualPhone);
+          const dialButton = document.getElementById('dialButton');
+          dialButton.style.display = 'block';  // 显示拨打按钮
+          dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
 
-          // 隐藏发送按钮等内容
+          // 绑定拨号按钮点击事件
+          dialButton.onclick = () => {
+            const confirmation = confirm(`您即将拨打虚拟号码：${virtualPhone}. 确认拨打?`);
+            if (confirmation) {
+              window.location.href = `tel:${virtualPhone}`;
+            }
+          };
+
+          // 隐藏其他内容
           document.getElementById('sendButton').style.display = 'none';
           document.getElementById('requestUrlDisplay').style.display = 'none';
         } else {
@@ -115,20 +123,6 @@
         alert('发生错误，绑定失败');
       }
     });
-
-    // 显示拨打虚拟号码按钮
-    function showDialButton(virtualPhone) {
-      const dialButton = document.getElementById('dialButton');
-      dialButton.style.display = 'block';  // 显示拨打按钮
-      dialButton.innerText = `拨打虚拟号码: ${virtualPhone}`;
-
-      dialButton.onclick = () => {
-        const confirmation = confirm(`您即将拨打虚拟号码：${virtualPhone}. 确认拨打?`);
-        if (confirmation) {
-          window.location.href = `tel:${virtualPhone}`;
-        }
-      };
-    }
   </script>
 
 </body>
